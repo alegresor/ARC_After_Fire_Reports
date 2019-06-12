@@ -1,5 +1,11 @@
-# Analysis of reports following fires resonded to by the American Red Cross 
-IIIT IPRO 497-318
+# IIIT IPRO 497-318
+Analysis of follow up reports to fires by [American Red Cross](https://www.redcross.org/) volunteers
+<hr>
+
+## Links
++ [Chicago Data Portal](https://data.cityofchicago.org/)
++ [GitHub Repo](https://github.com/alegresor/ARC_After_Fire_Reports)
+<hr>
 
 ### Authors
-Matt Robison, Bo Rodda, Aleksei Sorokin, Elliot Tan, Angelin Thomas, Yunhan Zhang
+Matt Robison, Bo Rodda, Daniel Chichester, Aleksei Sorokin, Elliot Tan, Angelin Thomas, Yunhan Zhang
