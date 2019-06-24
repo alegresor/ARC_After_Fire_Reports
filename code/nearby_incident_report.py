@@ -3,6 +3,11 @@ from numpy import sqrt,nansum,nanmin,nanmax,nanmean,nanmean,nanstd,abs
 import pandas as pd
 import matplotlib.pyplot as plt
 from geopy.geocoders import Nominatim
+# Plotly
+from plotly.offline import plot as plotly_plt
+from plotly import graph_objs
+from plotly import tools
+tools.set_credentials_file(username='alegresor', api_key='Z3RQvJzooCh3ib7nBNPg')
 
 stat_fs = OrderedDict({
     'total': lambda x: nansum(x),
@@ -18,21 +23,27 @@ def lookup_address(addr_str,geolocator=Nominatim()):
     addr_p = geolocator.geocode(addr_str)
     return addr_p,(addr_p.latitude,addr_p.longitude)
 
-
 def get_nearby_df(this_lat,this_lng,df,radius=.01):
     return df[ll_dist2((this_lat,this_lng),(df['lat'],df['lng'])) <= radius]
 
 def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,output,show):
     if pltType == 'scatter':
-        fig, ax = plt.subplots()
-        fig.suptitle(title,color='blue')
-        ax.set_xlabel(xlabel,color='blue')
-        ax.set_ylabel(ylabel,color='blue')
-        for name,(trend,color) in data_y.items():
-            plt.scatter(data_x,trend,color=color,label=name)
-        plt.legend()
-        if output: plt.savefig('output/Figures/%s.png'%(title),dpi=150) 
-        if show: plt.show()
+        data = [graph_objs.Scatter(x=data_x,y=trend,name=name,mode ='markers') for name,trend in data_y.items()]
+        layout= graph_objs.Layout(
+            title= title,
+            hovermode= 'closest',
+            xaxis= dict(
+                title = xlabel,
+                ticklen = 5,
+                zeroline = False,
+                gridwidth = 2),
+            yaxis=dict(
+                title= ylabel,
+                ticklen= 5,
+                gridwidth= 2),
+            showlegend = True)
+        fig = graph_objs.Figure(data=data,layout=layout) 
+        plotly_plt(fig,filename='output/Figures/%s.html'%(title))
 
 def gen_stat_df(df,categories,stats):
     new_df = {'category':categories}
@@ -52,7 +63,7 @@ if __name__ == '__main__':
     print('GeoCoded Address: %s \n\tlat,lng: (%-.3f,%-.3f)'%(addr_str_clean,addr_lat,addr_lng))
     # Get nearby incidents
     nearby_df = get_nearby_df(addr_lat,addr_lng,incidents_df)
-    print('\nNearby Incidents DataFrame:\n',nearby_df.head())
+    print('\nNearby Incidents DataFrame (head):\n',nearby_df.head())
     # Create scatter plot
     gen_figure(
         pltType = 'scatter',
@@ -60,8 +71,8 @@ if __name__ == '__main__':
         xlabel = 'Adults',
         ylabel = 'Outcome',
         data_x = nearby_df['num_adults'].values,
-        data_y = {'Hospitalized':(nearby_df['num_people_hospitalized'].values,'green'),
-                'Deceased':(nearby_df['num_people_deceased'].values,'red')},
+        data_y = {'Hospitalized':nearby_df['num_people_hospitalized'].values,
+                'Deceased':nearby_df['num_people_deceased'].values},
         output = True,show=True)
     # Get stats of nearby incidents
     nearby_stats_df = gen_stat_df(
