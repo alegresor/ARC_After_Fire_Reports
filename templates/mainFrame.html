@@ -1,0 +1,47 @@
+{% load static %}<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>IPRO ~ ARC</title>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+	</head>
+
+	<body class="body" style="background-color:#ffffff">
+		<!-- Title -->
+		<center>{% block pageTitle %}{% endblock %}</center>
+		<!-- Header -->
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      	<div class="container">	
+            <a href="{% url 'index' %}" class="navbar-brand">ARC Data Project</a>
+            <button class="navbar-toggler" type="button" data-target="#navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav">
+					<li class="nav-item"><a href="{% url 'index' %}" class="nav-link">Home</a>
+					<li class="nav-item"><a href="{% url 'Incidents' %}" class="nav-link">Incidents</a></li>
+                    <li class="nav-item"><a href="{% url 'Maps' %}" class="nav-link">Maps</a></li>
+                    <li class="nav-item"><a href="{% url 'About' %}"class="nav-link">About</a></li>
+                </ul>
+            </div>
+		</nav>
+		</div>
+		<br><br>
+
+		<!-- Content -->
+		<div class="container">
+			{% block content %}
+			{% endblock %}
+		</div>
+
+		<!-- Footer -->
+		<footer>
+			<div class="container">
+				<hr>
+				<p><a href="https://www.github.com/alegresor/ARC_After_Fire_Reports" target="blank">GitHub</a></p>
+			</div>
+		</footer>		
+	</body>
+
+</html>

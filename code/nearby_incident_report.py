@@ -43,7 +43,7 @@ def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,output,show):
                 gridwidth= 2),
             showlegend = True)
         fig = graph_objs.Figure(data=data,layout=layout) 
-        plotly_plt(fig,filename='output/Figures/%s.html'%(title))
+        plotly_plt(fig,filename='templates/Incidents/Plotly/%s.html'%(title))
 
 def gen_stat_df(df,categories,stats):
     new_df = {'category':categories}
@@ -51,10 +51,10 @@ def gen_stat_df(df,categories,stats):
         new_df[stat] = [stat_fs[stat](df[cat].values) for cat in categories]
     return pd.DataFrame(new_df)
 
+incidents_df = pd.read_csv('data/Incidents_Clean.csv')
 if __name__ == '__main__':
     ''' Example use of functions '''
     # Create example address (str)
-    incidents_df = pd.read_csv('data/Incidents_Clean.csv')
     fire1 = incidents_df.loc[0]
     addr_str_raw = '%s %s %s %d %s'%(fire1['address'],fire1['city'],fire1['state'],fire1['zip'],fire1['county'])
     print('\nLookUp Address: %s \n\tlat,lng: (%-.3f,%-.3f)'%(addr_str_raw,fire1['lat'],fire1['lng']))
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     # Create scatter plot
     gen_figure(
         pltType = 'scatter',
-        title = 'Fire Injuries and Casualities by Adults Present',
+        title = 'Fire_Injuries_Casualities_by_Adults_Present',
         xlabel = 'Adults',
         ylabel = 'Outcome',
         data_x = nearby_df['num_adults'].values,

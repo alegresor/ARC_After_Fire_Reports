@@ -1,0 +1,15 @@
+{% extends "mainFrame.html" %}
+
+{% block pageTitle %}<h1>American Red Cross Data Project</h1>{% endblock %}
+        
+{% block content %}
+    <h2> Incidents </h2>
+            {% include "Incidents/incidentSearchForm.html" %}<br>
+        <h5> Recent Indicents</h5>
+            {% include "Incidents/incidentTable.html" with incidents=incidents %}
+            <br><hr>
+    <h2>Maps</h2>
+        {% include "Maps/mapsTable.html" with maps=maps%}
+{% endblock %}
+
+

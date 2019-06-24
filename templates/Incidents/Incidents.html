@@ -1,0 +1,12 @@
+{% extends "mainFrame.html" %}
+
+{% block pageTitle %}<h1>Incidents</h1>{% endblock %}
+
+{% block content %}
+    <h3>Search Address</h3>
+        {% include "Incidents/incidentSearchForm.html" %}
+        <br><hr>
+    <h3> Recent Indicents</h3>
+        {% include "Incidents/incidentTable.html" with incidents=incidents %}
+    <h5> <a href = "{% url 'download' 'Incidents_Clean.csv' %}">Download complete incidents dataset (csv)</a></h5>
+{% endblock %}
