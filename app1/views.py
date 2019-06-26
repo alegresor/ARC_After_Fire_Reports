@@ -4,27 +4,25 @@ from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponse, Http404, FileResponse
 from wsgiref.util import FileWrapper
 from code import incidents_df
-incidents_df.sort_values(by=['date'],inplace=True,ascending=False)
+incidents_df.sort_values(by=['Date'],inplace=True,ascending=False)
 
 # Menu
 def index(request):
-    incidents = incidents_df[['date','city','zip','county']].iloc[:4,:]
+    incidents = incidents_df[['Date','City','Zip','County']].iloc[:4,:]
     incidents = incidents.to_html(index=False,classes="table table-striped table-dark")
-    maps = ['USA']
-    return render(request, 'index.html', {'incidents': incidents, 'maps':maps})
+    return render(request, 'index.html', {'incidents': incidents})
 def Incidents(request):
-    incidents = incidents_df[['date','city','zip','county','num_people_injured','num_people_hospitalized','num_people_deceased']].iloc[:49,:]
+    incidents = incidents_df[['Date','City','Zip','County','People Injured','People Hospitalized','People Deceased']].iloc[:49,:]
     incidents = incidents.to_html(index=False,classes="table table-striped table-dark")
     return render(request, 'Incidents/Incidents.html', {'incidents': incidents})
 def Maps(request):
-    maps = ['USA']
-    return render(request, 'Maps/Maps.html', {'maps':maps})
+    return render(request,'Maps/Maps.html')
 def About(request):
     return render(request, 'About.html')
 
 # Incident SubPages
 def incidentSpecific(request,incidentNum):
-    thisIncident = incidents_df.loc[incidents_df['incident_number'] == incidentNum]
+    thisIncident = incidents_df.loc[incidents_df['Incident Number'] == incidentNum]
     return render(request, 'incidentSpecific.html', {'incident': thisIncident})
 def incidentSearch(request):
     if request.method == "POST":
@@ -34,8 +32,8 @@ def incidentSearch(request):
     else: raise Http404
 
 # Util
-def QGIS(request, mapName):
-    return render(request, 'Maps/QGIS/%s.html'%mapName)
+def QGIS(request, mapDir):
+    return render(request,'index2.html')#%mapDir)
 def Plotly(request,plotName):
     return render(request, 'Incidents/Plotly/%s.html'%plotName)
 def download(request, fName):

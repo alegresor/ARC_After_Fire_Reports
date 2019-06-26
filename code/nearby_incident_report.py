@@ -29,7 +29,7 @@ def get_nearby_df(this_lat,this_lng,df,radius=.01):
 def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,output,show):
     if pltType == 'scatter':
         data = [graph_objs.Scatter(x=data_x,y=trend,name=name,mode ='markers') for name,trend in data_y.items()]
-        layout= graph_objs.Layout(
+        layout = graph_objs.Layout(
             title= title,
             hovermode= 'closest',
             xaxis= dict(
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     ''' Example use of functions '''
     # Create example address (str)
     fire1 = incidents_df.loc[0]
-    addr_str_raw = '%s %s %s %d %s'%(fire1['address'],fire1['city'],fire1['state'],fire1['zip'],fire1['county'])
+    addr_str_raw = '%s %s %s %d %s'%(fire1['Address'],fire1['City'],fire1['State'],fire1['Zip'],fire1['County'])
     print('\nLookUp Address: %s \n\tlat,lng: (%-.3f,%-.3f)'%(addr_str_raw,fire1['lat'],fire1['lng']))
     # Look up example address
     addr_str_clean,(addr_lat,addr_lng) = lookup_address(addr_str_raw)
@@ -70,16 +70,16 @@ if __name__ == '__main__':
         title = 'Fire_Injuries_Casualities_by_Adults_Present',
         xlabel = 'Adults',
         ylabel = 'Outcome',
-        data_x = nearby_df['num_adults'].values,
-        data_y = {'Hospitalized':nearby_df['num_people_hospitalized'].values,
-                'Deceased':nearby_df['num_people_deceased'].values},
+        data_x = nearby_df['Adults'].values,
+        data_y = {'Hospitalized':nearby_df['People Hospitalized'].values,
+                'Deceased':nearby_df['People Deceased'].values},
         output = True,show=True)
     # Get stats of nearby incidents
     nearby_stats_df = gen_stat_df(
         df=nearby_df,
-        categories=['units_destroyed','units_major', 'units_minor', 'units_affected',
-              'num_people_injured', 'num_people_hospitalized', 'num_people_deceased',
-              'num_adults', 'num_children', 'num_families','assistance_given'],
+        categories=['Units Destroyed','Units Major', 'Units Minor', 'Units Affected',
+              'People Injured', 'People Hospitalized', 'People Deceased',
+              'Adults', 'Children', 'Families','Assistance'],
         stats=['total','min_f','max_f','mean_f','std_f'])
     print('\nStats of Nearby DataFrame\n',nearby_stats_df)
     

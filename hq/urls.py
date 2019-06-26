@@ -30,7 +30,8 @@ urlpatterns = [
     path('Incidents/Search/', views.incidentSearch, name = 'incidentSearch'),
     path('Incidents/Plotly/<plotName>/', views.Plotly, name = 'Plotly'),
     # Map SubPages
-    path('Maps/QGIS/<mapName>/', views.QGIS, name = 'QGIS'),
+    path('Maps/QGIS/<mapDir>/', views.QGIS, name = 'QGIS'),
     # Util
     path('download/<fName>/',views.download, name = 'download'),
+    path('download/<ffName>/<fName>/',views.download,name='download'),
     path('viewPDF/<fName>/', views.viewPDF, name = 'viewPDF')]
