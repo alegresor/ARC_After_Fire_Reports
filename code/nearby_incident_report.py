@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from numpy import sqrt,nansum,nanmin,nanmax,nanmean,nanmean,nanstd,abs
 import pandas as pd
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as matplotlib_plt
 from geopy.geocoders import Nominatim
 # Plotly
 from plotly.offline import plot as plotly_plt

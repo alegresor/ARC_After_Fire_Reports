@@ -1,0 +1,14 @@
+{% extends "mainFrame.html" %}
+
+{% block pageTitle %}<h1> Address Specific </h1>{% endblock %}
+
+{% block content %}
+    <h3> Parsed Address </h3>
+        {{parsedAddress}}
+        <br><hr>   
+    <h3> Nearby Incidents </h3>
+        {% include "Incidents/incidentTable.html" with incidents=nearbyIncidents %}
+        <br><hr>
+    <h3> Nearby Incident Statistics </h3>
+        {% include "Incidents/incidentTable.html" with incidents=nearbyIncidentsStats %}
+{% endblock %}

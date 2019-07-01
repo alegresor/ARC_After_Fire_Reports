@@ -27,7 +27,6 @@ urlpatterns = [
     path('About/', views.About, name='About'),
     # Incident SubPages
     path('Incidents/<incidentNum>', views.incidentSpecific, name = 'incidentSpecific'),
-    path('Incidents/Search/', views.incidentSearch, name = 'incidentSearch'),
     path('Incidents/Plotly/<plotName>/', views.Plotly, name = 'Plotly'),
     # Map SubPages
     path('Maps/QGIS/<mapDir>/', views.QGIS, name = 'QGIS'),
