@@ -4,13 +4,16 @@
 {% block pageTitle %}<h1>American Red Cross Data Project</h1>{% endblock %}
         
 {% block content %}
-    <h2> Incidents </h2>
+    <h2>Incidents</h2>
             {% include "Incidents/incidentSearchForm.html" %}<br>
-        <h5> Recent Indicents</h5>
+        <h5>Recent Indicents</h5>
             {% include "Incidents/incidentTable.html" with incidents=incidents %}
             <br><hr>
-    <h2>Maps</h2>
-    <a href = "{% url 'download' 'USA_Rails.zip' %}" target=blank><img src="{% static 'QGIS_Previews/USA_Rails.png' %}" height="250" width = "500"></a>
+    <h2>Plots</h2>
+        <img src="{% static 'QGIS_Previews/Assistance_by_ZipCode.png' %}" height="200" width = "400">
+            <a href="{% url 'download' 'Assistance_by_ZipCode.zip' %}" target=blank>
+            <figcaption>Assistance by ZipCode</figcaption></a>
+        
 {% endblock %}
 
 

@@ -23,14 +23,11 @@ urlpatterns = [
     # Menu
     path('', views.index, name='index'),
     path('Incidents/', views.Incidents, name='Incidents'),
-    path('Maps/', views.Maps, name='Maps'),
+    path('Plots/', views.Plots, name='Plots'),
     path('About/', views.About, name='About'),
     # Incident SubPages
     path('Incidents/<incidentNum>', views.incidentSpecific, name = 'incidentSpecific'),
-    path('Incidents/Plotly/<plotName>/', views.Plotly, name = 'Plotly'),
-    # Map SubPages
-    path('Maps/QGIS/<mapDir>/', views.QGIS, name = 'QGIS'),
     # Util
+    path('Plots/Plotly/<plotName>/', views.Plotly, name = 'Plotly'),
     path('download/<fName>/',views.download, name = 'download'),
-    path('download/<ffName>/<fName>/',views.download,name='download'),
     path('viewPDF/<fName>/', views.viewPDF, name = 'viewPDF')]

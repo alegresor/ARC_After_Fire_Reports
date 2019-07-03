@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from numpy import sqrt,nansum,nanmin,nanmax,nanmean,nanmean,nanstd,abs
+from numpy import sqrt,nansum,nanmin,nanmax,nanmean,nanmean,nanstd,abs,sin,cos,arctan2
 import pandas as pd
 import matplotlib.pyplot as matplotlib_plt
 from geopy.geocoders import Nominatim
@@ -17,7 +17,13 @@ stat_fs = OrderedDict({
     'std_f': lambda x: nanstd(x),
     'zStat_f': lambda x: (x-nanmean(x))/nanstd(x),
     'uStat_f': lambda x: x/(nanmax(x)-nanmin(x))})
-ll_dist2 = lambda ll1,ll2: sqrt((ll1[0]-ll2[0])**2+(ll1[1]-ll2[1])**2)
+
+def ll_dist2(ll1,ll2):
+    ''' Distance between 2 lat-lng points '''
+    dlat = ll1[0]  - ll2[0] 
+    dlon = ll1[1] - ll2[1]
+    a = sin(dlat/2)**2 + cos(ll1[0])*cos(ll2[0])*sin(dlon/2)**2 
+    return 2*3958.8*arctan2(sqrt(a),sqrt(1-a)) 
 
 def lookup_address(addr_str,geolocator=Nominatim()):
     addr_p = geolocator.geocode(addr_str)

@@ -18,8 +18,8 @@ def Incidents(request):
     incidents = incidents_df[['Date','City','Zip','County','People Injured','People Hospitalized','People Deceased']].iloc[:49,:]
     incidents = incidents.to_html(index=False,classes="table table-striped table-dark")
     return render(request, 'Incidents/Incidents.html', {'incidents': incidents})
-def Maps(request):
-    return render(request,'Maps/Maps.html')
+def Plots(request):
+    return render(request,'Plots/Plots.html')
 def About(request):
     return render(request, 'About.html')
 
@@ -54,10 +54,8 @@ def incidentSearch(request,address,radius):
             'nearbyIncidents': nearbyIncidents,
             'nearbyIncidentsStats': nearbyIncidentsStats})
 # Util
-def QGIS(request, mapDir):
-    return render(request,'index2.html')#%mapDir)
 def Plotly(request,plotName):
-    return render(request, 'Incidents/Plotly/%s.html'%plotName)
+    return render(request, 'Plotly/%s.html'%plotName)
 def download(request, fName):
     fPath = os.path.join(settings.MEDIA_ROOT, fName)
     if os.path.exists(fPath):
