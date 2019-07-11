@@ -33,7 +33,9 @@ def get_nearby_df(this_lat,this_lng,df,radius=.01):
     return df[ll_dist2((this_lat,this_lng),(df['lat'],df['lng'])) <= radius]
 
 def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,output,show):
+    # defines plot type
     if pltType == 'scatter':
+        # 
         data = [graph_objs.Scatter(x=data_x,y=trend,name=name,mode ='markers') for name,trend in data_y.items()]
         layout = graph_objs.Layout(
             title= title,
@@ -58,6 +60,11 @@ def gen_stat_df(df,categories,stats):
     return pd.DataFrame(new_df)
 
 incidents_df = pd.read_csv('data/Incidents_Clean.csv')
+
+total_adults_by_county = pd.pivot_table(incidents_df, values='Adults', index='County',aggfunc='sum')
+
+
+
 if __name__ == '__main__':
     ''' Example use of functions '''
     # Create example address (str)
