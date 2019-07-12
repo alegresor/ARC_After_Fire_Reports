@@ -3,9 +3,8 @@ from django.conf import settings
 from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponse, Http404, FileResponse
 from wsgiref.util import FileWrapper
-from code import *
+from code import incidents_df,lookup_address,get_nearby_df,gen_stat_df
 incidents_df.sort_values(by=['Date'],inplace=True,ascending=False)
-
 
 # Menu
 def index(request):
@@ -19,7 +18,7 @@ def Incidents(request):
     incidents = incidents.to_html(index=False,classes="table table-striped table-dark")
     return render(request, 'Incidents/Incidents.html', {'incidents': incidents})
 def Plots(request):
-    return render(request,'Plots/Plots.html')
+    return render(request,'Plots.html')
 def About(request):
     return render(request, 'About.html')
 
@@ -54,8 +53,8 @@ def incidentSearch(request,address,radius):
             'nearbyIncidents': nearbyIncidents,
             'nearbyIncidentsStats': nearbyIncidentsStats})
 # Util
-def Plotly(request,plotName):
-    return render(request, 'Plotly/%s.html'%plotName)
+def iframe(request,plotName):
+    return render(request, 'iframes/%s.html'%plotName)
 def download(request, fName):
     fPath = os.path.join(settings.MEDIA_ROOT, fName)
     if os.path.exists(fPath):

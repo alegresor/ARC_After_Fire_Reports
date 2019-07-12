@@ -1,0 +1,10 @@
+{% extends "mainFrame.html" %}
+
+{% block pageTitle%}<h1>Plots</h1>{% endblock %}
+
+{% block content %}
+    <iframe src="Iframe/test_map" height="500" width="100%"></iframe>
+    <h3>PreGenerated Plots with Plotly</h3>
+        <p>Plots generated based on complete set of ARC incident reports</p>
+        <iframe src="Iframe/Fire_Injuries_Casualities_by_Adults_Present" height="500" width="600"></iframe>
+{% endblock %}
