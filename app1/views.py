@@ -3,8 +3,16 @@ from django.conf import settings
 from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponse, Http404, FileResponse
 from wsgiref.util import FileWrapper
-from code import incidents_df,lookup_address,get_nearby_df,gen_stat_df
+from code import lookup_address,get_nearby_df,gen_stat_df,create_map
+
+# Global DataFrames
+#    Incidents
+incidents_df_dirty = pd.read_csv('data/Incidents_Clean.csv')
+incidents_df_dirty.Zip = incidents_df_dirty.Zip.map(lambda zipStr: str(zipStr).split('.')[0])
+incidents_df = incidents_df_dirty.dropna(subset=['lat','lng'])
 incidents_df.sort_values(by=['Date'],inplace=True,ascending=False)
+#   Fire Stations
+stations_df = pd.read_csv('Data/Fire_Stations_Clean.csv')
 
 # Menu
 def index(request):
@@ -28,25 +36,29 @@ def incidentSpecific(request,incidentNum):
     return render(request, 'incidentSpecific.html', {'incident': thisIncident})
 def incidentSearch(request,address,radius):
     parsedAddress,(addr_lat,addr_lng) = lookup_address(address)
-    nearby_df = get_nearby_df(addr_lat,addr_lng,incidents_df,radius=radius)
+    nearby_incidents_df = get_nearby_df(addr_lat,addr_lng,incidents_df,radius=radius)
+    nearby_stations_df = get_nearby_df(addr_lat,addr_lng,stations_df,radius=radius)
+    # Get Stats
     nearby_stats_df = gen_stat_df(
-    df=nearby_df,
-    categories=['Units Destroyed','Units Major', 'Units Minor', 'Units Affected',
-        'People Injured', 'People Hospitalized', 'People Deceased',
-        'Adults', 'Children', 'Families','Assistance'],
-    stats=['total','min_f','max_f','mean_f','std_f'])
-    '''
+        df=nearby_incidents_df,
+        categories=['Units Destroyed','Units Major', 'Units Minor', 'Units Affected',
+            'People Injured', 'People Hospitalized', 'People Deceased',
+            'Adults', 'Children', 'Families','Assistance'],
+        stats=['total','min_f','max_f','mean_f','std_f'])
+    # Gen Map
+    create_map(nearby_incidents_df,stations_df,(addr_lat,addr_lng),18,'folium_Map_TMP')
+    # Gen Plots
     gen_figure(
         pltType = 'scatter',
         title = 'Fire_Injuries_Casualities_by_Adults_Present',
         xlabel = 'Adults',
         ylabel = 'Outcome',
-        data_x = nearby_df['Adults'].values,
-        data_y = {'Hospitalized':nearby_df['People Hospitalized'].values,
-                'Deceased':nearby_df['People Deceased'].values},
-        output = True,show=True)
-    '''
-    nearbyIncidents = nearby_df[['Date','Address','Zip','lat','lng','People Injured','People Hospitalized','People Deceased']].to_html(index=False,classes="table table-striped table-dark")
+        data_x = nearby_incidents_df['Adults'].values,
+        data_y = {'Hospitalized':nearby_incidents_df['People Hospitalized'].values,
+                'Deceased':nearby_incidents_df['People Deceased'].values},
+        fname='plotly_Scatter_TMP')
+    # Convert incidents and stats dataframes to HTML
+    nearbyIncidents = nearby_incidents_df[['Date','Address','Zip','lat','lng','People Injured','People Hospitalized','People Deceased']].to_html(index=False,classes="table table-striped table-dark")
     nearbyIncidentsStats = nearby_stats_df.to_html(index=False,classes="table table-striped table-dark")
     return render(request,'Incidents/incidentSpecific.html',
             {'parsedAddress': parsedAddress,

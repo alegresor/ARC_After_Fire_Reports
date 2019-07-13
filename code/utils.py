@@ -3,6 +3,8 @@ from numpy import sqrt,nansum,nanmin,nanmax,nanmean,nanmean,nanstd,abs,sin,cos,a
 import pandas as pd
 import matplotlib.pyplot as matplotlib_plt
 from geopy.geocoders import Nominatim
+import folium
+from folium.plugins import MarkerCluster,HeatMap
 # Plotly
 from plotly.offline import plot as plotly_plt
 from plotly import graph_objs
@@ -29,10 +31,16 @@ def lookup_address(addr_str,geolocator=Nominatim()):
     addr_p = geolocator.geocode(addr_str)
     return addr_p,(addr_p.latitude,addr_p.longitude)
 
-def get_nearby_df(this_lat,this_lng,df,radius=.01):
+def get_nearby_df(this_lat,this_lng,df,radius=15):
     return df[ll_dist2((this_lat,this_lng),(df['lat'],df['lng'])) <= radius]
 
-def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,output,show):
+def gen_stat_df(df,categories,stats):
+    new_df = {'category':categories}
+    for stat in stats:
+        new_df[stat] = [stat_fs[stat](df[cat].values) for cat in categories]
+    return pd.DataFrame(new_df)
+
+def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,fname):
     if pltType == 'scatter':
         data = [graph_objs.Scatter(x=data_x,y=trend,name=name,mode ='markers') for name,trend in data_y.items()]
         layout = graph_objs.Layout(
@@ -49,31 +57,75 @@ def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,output,show):
                 gridwidth= 2),
             showlegend = True)
         fig = graph_objs.Figure(data=data,layout=layout) 
-        plotly_plt(fig,filename='templates/Incidents/Plotly/%s.html'%(title))
+        plotly_plt(fig,filename='templates/iframes/%s.html'%(fname),show_link=False)
     if pltType == 'multipleBar':
         #total_adults_by_county = pd.pivot_table(incidents_df, values='Adults', index='County',aggfunc='sum')
         pass
 
-def gen_stat_df(df,categories,stats):
-    new_df = {'category':categories}
-    for stat in stats:
-        new_df[stat] = [stat_fs[stat](df[cat].values) for cat in categories]
-    return pd.DataFrame(new_df)
-
-incidents_df = pd.read_csv('data/Incidents_Clean.csv')
+def create_map(incidents_df,stations_df,location,zoom_start,outputName):
+    # Construct Map
+    incident_map = folium.Map(
+        location = location,
+        tiles = 'Stamen Toner',
+        zoom_start = zoom_start,
+        control_scale = True,
+        prefer_canvas = True)
+    # Shape Overlays
+    #    Chicago Zip Codes
+    folium.GeoJson(
+        data = 'data/Chicago_ZipCodes.geojson',
+        style_function = lambda x: {'fillColor':'#0d00ff','weight':2},
+        name = 'Chicago Zip Code Shapes',
+        show = False).add_to(incident_map)
+    #    Chicago Neighborhoods
+    folium.GeoJson(
+        data = 'data/Chicago_Neighborhoods.geojson',
+        style_function = lambda x: {'fillColor':'#00ffe1','weight':2},
+        name = ' Chicago Neighborhood Shapes',
+        show = False).add_to(incident_map)
+    # Incidents
+    incident_locations = incidents_df[['lat','lng']].values
+    MarkerCluster(
+        locations = incident_locations,
+        icons = [folium.Icon(color='red',icon_color='white',icon='fire', prefix="fa",) for _ in range(len(incident_locations))],
+        name = 'Incident Markers',
+        show = True).add_to(incident_map)
+    HeatMap(incident_locations,name='Incidents HeatMap',show=True).add_to(incident_map)
+    # Fire Stations
+    station_locations = stations_df[['lat','lng']].values
+    MarkerCluster(
+        locations = station_locations,
+        icons = [folium.Icon(color='red',icon_color='white',icon='fire-extinguisher', prefix="fa",) for _ in range(len(station_locations))],
+        name = 'Fire Station Markers',
+        show = False).add_to(incident_map)
+    HeatMap(station_locations,name='Fire Stations HeatMap',show=False).add_to(incident_map)
+    # Layer Control
+    folium.LayerControl().add_to(incident_map)
+    # Save Map
+    incident_map.save(outfile='templates/iframes/%s.html'%outputName)
 
 if __name__ == '__main__':
-    ''' Example use of functions '''
+    # Global DataFrames
+    #    Incidents
+    incidents_df_dirty = pd.read_csv('data/Incidents_Clean.csv')
+    incidents_df_dirty.Zip = incidents_df_dirty.Zip.map(lambda zipStr: str(zipStr).split('.')[0])
+    incidents_df = incidents_df_dirty.dropna(subset=['lat','lng'])
+    #   Fire Stations
+    stations_df = pd.read_csv('Data/Fire_Stations_Clean.csv')
+
+    ''' Example Use of Functions '''
     # Create example address (str)
     fire1 = incidents_df.loc[0]
-    addr_str_raw = '%s %s %s %d %s'%(fire1['Address'],fire1['City'],fire1['State'],fire1['Zip'],fire1['County'])
+    addr_str_raw = '%s %s %s %s %s'%(fire1['Address'],fire1['City'],fire1['State'],fire1['Zip'],fire1['County'])
     print('\nLookUp Address: %s \n\tlat,lng: (%-.3f,%-.3f)'%(addr_str_raw,fire1['lat'],fire1['lng']))
     # Look up example address
     addr_str_clean,(addr_lat,addr_lng) = lookup_address(addr_str_raw)
     print('GeoCoded Address: %s \n\tlat,lng: (%-.3f,%-.3f)'%(addr_str_clean,addr_lat,addr_lng))
     # Get nearby incidents
-    nearby_df = get_nearby_df(addr_lat,addr_lng,incidents_df)
+    nearby_df = get_nearby_df(addr_lat,addr_lng,incidents_df,radius=15)
     print('\nNearby Incidents DataFrame (head):\n',nearby_df.head())
+    
+    ''' Generate Statics HTML files'''
     # Create scatter plot
     gen_figure(
         pltType = 'scatter',
@@ -83,7 +135,7 @@ if __name__ == '__main__':
         data_x = nearby_df['Adults'].values,
         data_y = {'Hospitalized':nearby_df['People Hospitalized'].values,
                 'Deceased':nearby_df['People Deceased'].values},
-        output = True,show=True)
+        fname = 'plotly_Scatter_Static')
     # Get stats of nearby incidents
     nearby_stats_df = gen_stat_df(
         df=nearby_df,
@@ -92,6 +144,11 @@ if __name__ == '__main__':
               'Adults', 'Children', 'Families','Assistance'],
         stats=['total','min_f','max_f','mean_f','std_f'])
     print('\nStats of Nearby DataFrame\n',nearby_stats_df)
+    
+    # Generate Folium Map
+    create_map(incidents_df,stations_df,(41.8349,-87.6270),15,'folium_Map_Static')
+    
+    
     
 
 
