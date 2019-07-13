@@ -1,5 +1,6 @@
 from collections import OrderedDict
-from numpy import sqrt,nansum,nanmin,nanmax,nanmean,nanmean,nanstd,abs,sin,cos,arctan2
+from numpy import sqrt,nansum,nanmin,nanmax,nanmean,nanmean,nanstd,abs,sin,cos
+from math import radians,atan2
 import pandas as pd
 import matplotlib.pyplot as matplotlib_plt
 from geopy.geocoders import Nominatim
@@ -20,20 +21,27 @@ stat_fs = OrderedDict({
     'zStat_f': lambda x: (x-nanmean(x))/nanstd(x),
     'uStat_f': lambda x: x/(nanmax(x)-nanmin(x))})
 
-def ll_dist2(ll1,ll2):
+def ll_dist2(lat1,lng1,lat2,lng2):
     ''' Distance between 2 lat-lng points '''
-    dlat = ll1[0]  - ll2[0] 
-    dlon = ll1[1] - ll2[1]
-    a = sin(dlat/2)**2 + cos(ll1[0])*cos(ll2[0])*sin(dlon/2)**2 
-    return 2*3958.8*arctan2(sqrt(a),sqrt(1-a)) 
+    R = 6373
+    lat1 = radians(lat1)
+    lng1 = radians(lng1)
+    lat2 = radians(lat2)
+    lng2 = radians(lng2)
+    dlon = lng2 - lng1
+    dlat = lat2 - lat1
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    C = 2 * atan2(sqrt(a), sqrt(1 - a))
+    dist = R*C*0.621371
+    return dist
 
 def lookup_address(addr_str,geolocator=Nominatim()):
     addr_p = geolocator.geocode(addr_str)
     return addr_p,(addr_p.latitude,addr_p.longitude)
 
 def get_nearby_df(this_lat,this_lng,df,radius=15):
-    return df[ll_dist2((this_lat,this_lng),(df['lat'],df['lng'])) <= radius]
-
+    return df[df.apply(lambda row: ll_dist2(this_lat,this_lng,row['lat'],row['lng']),axis=1) <= radius]
+    
 def gen_stat_df(df,categories,stats):
     new_df = {'category':categories}
     for stat in stats:
@@ -57,7 +65,7 @@ def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,fname):
                 gridwidth= 2),
             showlegend = True)
         fig = graph_objs.Figure(data=data,layout=layout) 
-        plotly_plt(fig,filename='templates/iframes/%s.html'%(fname),show_link=False)
+        plotly_plt(fig,filename='templates/iframes/%s.html'%(fname),auto_open=False)
     if pltType == 'multipleBar':
         #total_adults_by_county = pd.pivot_table(incidents_df, values='Adults', index='County',aggfunc='sum')
         pass

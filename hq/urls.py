@@ -28,6 +28,7 @@ urlpatterns = [
     # Incident SubPages
     path('Incidents/<incidentNum>', views.incidentSpecific, name = 'incidentSpecific'),
     # Util
-    path('Plots/Iframe/<plotName>/', views.iframe, name = 'iframe'),
+    path('Iframe/<plotName>/', views.iframe, name = 'iframe'),
+    path('Incidents/Iframe/<plotName>/', views.iframe, name = 'iframe'),
     path('download/<fName>/',views.download, name = 'download'),
     path('viewPDF/<fName>/', views.viewPDF, name = 'viewPDF')]

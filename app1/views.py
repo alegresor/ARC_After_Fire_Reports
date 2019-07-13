@@ -3,7 +3,9 @@ from django.conf import settings
 from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponse, Http404, FileResponse
 from wsgiref.util import FileWrapper
-from code import lookup_address,get_nearby_df,gen_stat_df,create_map
+import pandas as pd
+# Local Imports
+from code import lookup_address,get_nearby_df,gen_stat_df,create_map,gen_figure
 
 # Global DataFrames
 #    Incidents
@@ -15,16 +17,12 @@ incidents_df.sort_values(by=['Date'],inplace=True,ascending=False)
 stations_df = pd.read_csv('Data/Fire_Stations_Clean.csv')
 
 # Menu
-def index(request):
-    if request.method == "POST": return incidentSearch(request,str(request.POST['address']),radius = float(request.POST['radius']))  
-    incidents = incidents_df[['Date','City','Zip','County']].iloc[:4,:]
-    incidents = incidents.to_html(index=False,classes="table table-striped table-dark")
-    return render(request, 'index.html', {'incidents': incidents})
+def index(request): return render(request, 'index.html')
 def Incidents(request):
     if request.method == "POST": return incidentSearch(request,str(request.POST['address']),radius = float(request.POST['radius']))  
     incidents = incidents_df[['Date','City','Zip','County','People Injured','People Hospitalized','People Deceased']].iloc[:49,:]
     incidents = incidents.to_html(index=False,classes="table table-striped table-dark")
-    return render(request, 'Incidents/Incidents.html', {'incidents': incidents})
+    return render(request, 'Incidents.html', {'incidents': incidents})
 def Plots(request):
     return render(request,'Plots.html')
 def About(request):
@@ -38,6 +36,8 @@ def incidentSearch(request,address,radius):
     parsedAddress,(addr_lat,addr_lng) = lookup_address(address)
     nearby_incidents_df = get_nearby_df(addr_lat,addr_lng,incidents_df,radius=radius)
     nearby_stations_df = get_nearby_df(addr_lat,addr_lng,stations_df,radius=radius)
+    if len(nearby_incidents_df)==0 or len(nearby_stations_df)==0:
+        return render(request,'Incidents/incidentSearchError.html')
     # Get Stats
     nearby_stats_df = gen_stat_df(
         df=nearby_incidents_df,
@@ -46,7 +46,7 @@ def incidentSearch(request,address,radius):
             'Adults', 'Children', 'Families','Assistance'],
         stats=['total','min_f','max_f','mean_f','std_f'])
     # Gen Map
-    create_map(nearby_incidents_df,stations_df,(addr_lat,addr_lng),18,'folium_Map_TMP')
+    create_map(nearby_incidents_df,nearby_stations_df,(addr_lat,addr_lng),16,'folium_Map_TMP')
     # Gen Plots
     gen_figure(
         pltType = 'scatter',
