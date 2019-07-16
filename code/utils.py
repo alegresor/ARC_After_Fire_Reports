@@ -64,7 +64,26 @@ def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,fname):
                 ticklen= 5,
                 gridwidth= 2),
             showlegend = True)
-        fig = graph_objs.Figure(data=data,layout=layout) 
+        fig = graph_objs.Figure(data=data,layout=layout)
+    if graph_type == 'bar_graph':
+        total_injured_by_county = pd.pivot_table(df, values='People Injured', index='County',aggfunc=agg_var)
+        total_unitsAffected_by_county = pd.pivot_table(df, values='Units Affected', index='County',aggfunc=agg_var)
+        layout = go.Layout(
+            title = 'People and Units Affects by County',
+            hovermode= 'closest',
+            xaxis= dict(title = 'County'),
+            yaxis=dict(title= 'Affects'),
+            showlegend = True)
+        fig = go.Figure(data=[
+                go.Bar(
+                    name='People Injured',
+                    x = total_injured_by_county.index.values,
+                    y = total_injured_by_county.values.flatten()),
+                go.Bar(
+                    name='Units Affected',
+                    x = total_unitsAffected_by_county.index.values,
+                    y = total_unitsAffected_by_county.values.flatten())],
+            layout = layout)
         plotly_plt(fig,filename='templates/iframes/%s.html'%(fname),auto_open=False)
     if pltType == 'multipleBar':
         #total_adults_by_county = pd.pivot_table(incidents_df, values='Adults', index='County',aggfunc='sum')
