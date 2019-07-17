@@ -147,7 +147,7 @@ if __name__ == '__main__':
         xlabel = 'Number Families',
         ylabel = 'Assistance',
         data_x = incidents_df['Families'].values,
-        data_y = {'Assistance':incidents_df['People Hospitalized'].values},
+        data_y = {'Assistance':incidents_df['Assistance'].values},
         fname = 'plotly_Scatter_Static')
     # Create Bar Chart plot
     xaxis = 'County'

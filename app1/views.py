@@ -51,12 +51,11 @@ def incidentSearch(request,address,radius):
     gen_figure(
         pltType = 'scatter',
         title = 'Fire Injuries and Casualities by Adults Present',
-        xlabel = 'Adults',
-        ylabel = 'Outcome',
-        data_x = nearby_incidents_df['Adults'].values,
-        data_y = {'Hospitalized':nearby_incidents_df['People Hospitalized'].values,
-                'Deceased':nearby_incidents_df['People Deceased'].values},
-        fname='plotly_Scatter_TMP')
+        xlabel = 'Number Families',
+        ylabel = 'Assistance',
+        data_x = nearby_incidents_df['Families'].values,
+        data_y = {'Assistance':nearby_incidents_df['Assistance'].values},
+        fname = 'plotly_Scatter_TMP')
     xaxis = 'County'
     total_injured_by_county = pd.pivot_table(nearby_incidents_df,values='People Injured',index=xaxis,aggfunc='sum')
     total_unitsAffected_by_county = pd.pivot_table(nearby_incidents_df,values='Units Affected',index=xaxis,aggfunc='sum')
@@ -72,8 +71,9 @@ def incidentSearch(request,address,radius):
         fname = 'plotly_MultiBar_TMP')
     # Convert incidents and stats dataframes to HTML
     nearbyIncidents = nearby_incidents_df[['Date','Address','Zip','lat','lng','People Injured','People Hospitalized','People Deceased']].to_html(index=False,classes="table table-striped table-dark")
+    nearby_stats_df.columns = ['Category','Total','Min','Max','Average','Standard Deviation']
     nearbyIncidentsStats = nearby_stats_df.to_html(index=False,classes="table table-striped table-dark")
-    nearbyIncidentsStats.columns = ['Category','Total','Min','Max','Average','Standard Deviation']
+    
     return render(request,'Incidents/incidentSpecific.html',
             {'parsedAddress': parsedAddress,
             'nearbyIncidents': nearbyIncidents,
