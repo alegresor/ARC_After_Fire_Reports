@@ -64,15 +64,15 @@ def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,fname):
                 ticklen= 5,
                 gridwidth= 2),
             showlegend = True)
-        fig = go.Figure(data=data,layout=layout)
     if pltType == 'multiBar':
+        data = [go.Bar(name=name,x=data_x,y=trend) for name,trend in data_y.items()]
         layout = go.Layout(
             title = title,
             hovermode= 'closest',
             xaxis= dict(title = xlabel),
             yaxis=dict(title= ylabel),
             showlegend = True)
-        fig = go.Figure(data=[go.Bar(name=name,x=data_x,y=trend) for name,trend in data_y.items()])
+    fig = go.Figure(data=data,layout=layout)
     plotly_plt(fig,filename='templates/iframes/%s.html'%(fname),auto_open=False)
 
 def create_map(incidents_df,stations_df,location,zoom_start,outputName):
@@ -108,7 +108,7 @@ def create_map(incidents_df,stations_df,location,zoom_start,outputName):
     station_locations = stations_df[['lat','lng']].values
     MarkerCluster(
         locations = station_locations,
-        icons = [folium.Icon(color='red',icon_color='white',icon='fire-extinguisher', prefix="fa",) for _ in range(len(station_locations))],
+        icons = [folium.Icon(color='green',icon_color='white',icon='fire-extinguisher', prefix="fa",) for _ in range(len(station_locations))],
         name = 'Fire Station Markers',
         show = False).add_to(incident_map)
     HeatMap(station_locations,name='Fire Stations HeatMap',show=False).add_to(incident_map)
@@ -118,6 +118,7 @@ def create_map(incidents_df,stations_df,location,zoom_start,outputName):
     incident_map.save(outfile='templates/iframes/%s.html'%outputName)
 
 if __name__ == '__main__':
+    ''' Run this file to generate Static plots and maps '''
     # Global DataFrames
     #    Incidents
     incidents_df_dirty = pd.read_csv('data/Incidents_Clean.csv')
@@ -154,7 +155,7 @@ if __name__ == '__main__':
     total_unitsAffected_by_county = pd.pivot_table(incidents_df,values='Units Affected',index=xaxis,aggfunc='sum')
     gen_figure(
         pltType = 'multiBar',
-        title = 'People and Units Affects by County',
+        title = 'People and Units Affected by County',
         xlabel = 'County',
         ylabel = 'Affects',
         data_x = total_injured_by_county.index.values,
