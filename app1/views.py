@@ -48,14 +48,16 @@ def incidentSearch(request,address,radius):
     # Gen Map
     create_map(nearby_incidents_df,nearby_stations_df,(addr_lat,addr_lng),16,'folium_Map_TMP')
     # Gen Plots
+    #    Scatter
     gen_figure(
         pltType = 'scatter',
-        title = 'Fire Injuries and Casualities by Adults Present',
+        title = 'Assistance by Families Present',
         xlabel = 'Number Families',
         ylabel = 'Assistance',
         data_x = nearby_incidents_df['Families'].values,
         data_y = {'Assistance':nearby_incidents_df['Assistance'].values},
         fname = 'plotly_Scatter_TMP')
+    #    Multi-Bar
     xaxis = 'County'
     total_injured_by_county = pd.pivot_table(nearby_incidents_df,values='People Injured',index=xaxis,aggfunc='sum')
     total_unitsAffected_by_county = pd.pivot_table(nearby_incidents_df,values='Units Affected',index=xaxis,aggfunc='sum')
@@ -69,6 +71,17 @@ def incidentSearch(request,address,radius):
             'People Injured':total_injured_by_county.values.flatten(),
             'Units Affected':total_unitsAffected_by_county.values.flatten()},
         fname = 'plotly_MultiBar_TMP')
+    #     Pie Chart
+    gen_figure(
+        pltType = 'pieChart',
+        title = 'Adult-Children Ratio',
+        xlabel = None,
+        ylabel = None,
+        data_x = None,
+        data_y = {
+            'Adults':nearby_incidents_df['Adults'].mean(),
+            'Children':nearby_incidents_df['Children'].mean()},
+        fname = 'plotly_PieChart_TMP')
     # Convert incidents and stats dataframes to HTML
     nearbyIncidents = nearby_incidents_df[['Date','Address','Zip','lat','lng','People Injured','People Hospitalized','People Deceased']].to_html(index=False,classes="table table-striped table-dark")
     nearby_stats_df.columns = ['Category','Total','Min','Max','Average','Standard Deviation']

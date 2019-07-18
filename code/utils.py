@@ -64,6 +64,7 @@ def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,fname):
                 ticklen= 5,
                 gridwidth= 2),
             showlegend = True)
+        fig = go.Figure(data=data,layout=layout)
     if pltType == 'multiBar':
         data = [go.Bar(name=name,x=data_x,y=trend) for name,trend in data_y.items()]
         layout = go.Layout(
@@ -72,7 +73,13 @@ def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,fname):
             xaxis= dict(title = xlabel),
             yaxis=dict(title= ylabel),
             showlegend = True)
-    fig = go.Figure(data=data,layout=layout)
+        fig = go.Figure(data=data,layout=layout)
+    if pltType == 'pieChart':
+        layout = go.Layout(
+            title = title,
+            showlegend = True)
+        data = [go.Pie(labels=list(data_y.keys()),values=list(data_y.values()))]
+        fig = go.Figure(data=data,layout=layout)
     plotly_plt(fig,filename='templates/iframes/%s.html'%(fname),auto_open=False)
 
 def create_map(incidents_df,stations_df,location,zoom_start,outputName):
@@ -143,7 +150,7 @@ if __name__ == '__main__':
     # Create scatter plot
     gen_figure(
         pltType = 'scatter',
-        title = 'Fire Injuries and Casualities by Adults Present',
+        title = 'Assistance by Families Present',
         xlabel = 'Number Families',
         ylabel = 'Assistance',
         data_x = incidents_df['Families'].values,
@@ -163,6 +170,17 @@ if __name__ == '__main__':
             'People Injured':total_injured_by_county.values.flatten(),
             'Units Affected':total_unitsAffected_by_county.values.flatten()},
         fname = 'plotly_MultiBar_Static')
+    # Create Pie Chart
+    gen_figure(
+        pltType = 'pieChart',
+        title = 'Adult-Children Ratio',
+        xlabel = None,
+        ylabel = None,
+        data_x = None,
+        data_y = {
+            'Adults':incidents_df['Adults'].mean(),
+            'Children':incidents_df['Children'].mean()},
+        fname = 'plotly_PieChart_Static')
     # Get stats of nearby incidents
     nearby_stats_df = gen_stat_df(
         df = nearby_df,
