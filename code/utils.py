@@ -8,7 +8,7 @@ import folium
 from folium.plugins import MarkerCluster,HeatMap
 # Plotly
 from plotly.offline import plot as plotly_plt
-from plotly import graph_objs
+from plotly import graph_objs as go
 from plotly import tools
 tools.set_credentials_file(username='alegresor', api_key='Z3RQvJzooCh3ib7nBNPg')
 
@@ -50,8 +50,8 @@ def gen_stat_df(df,categories,stats):
 
 def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,fname):
     if pltType == 'scatter':
-        data = [graph_objs.Scatter(x=data_x,y=trend,name=name,mode ='markers') for name,trend in data_y.items()]
-        layout = graph_objs.Layout(
+        data = [go.Scatter(x=data_x,y=trend,name=name,mode ='markers') for name,trend in data_y.items()]
+        layout = go.Layout(
             title= title,
             hovermode= 'closest',
             xaxis= dict(
@@ -64,30 +64,16 @@ def gen_figure(pltType,title,xlabel,ylabel,data_x,data_y,fname):
                 ticklen= 5,
                 gridwidth= 2),
             showlegend = True)
-        fig = graph_objs.Figure(data=data,layout=layout)
-    if graph_type == 'bar_graph':
-        total_injured_by_county = pd.pivot_table(df, values='People Injured', index='County',aggfunc=agg_var)
-        total_unitsAffected_by_county = pd.pivot_table(df, values='Units Affected', index='County',aggfunc=agg_var)
+    if pltType == 'multiBar':
+        data = [go.Bar(name=name,x=data_x,y=trend) for name,trend in data_y.items()]
         layout = go.Layout(
-            title = 'People and Units Affects by County',
+            title = title,
             hovermode= 'closest',
-            xaxis= dict(title = 'County'),
-            yaxis=dict(title= 'Affects'),
+            xaxis= dict(title = xlabel),
+            yaxis=dict(title= ylabel),
             showlegend = True)
-        fig = go.Figure(data=[
-                go.Bar(
-                    name='People Injured',
-                    x = total_injured_by_county.index.values,
-                    y = total_injured_by_county.values.flatten()),
-                go.Bar(
-                    name='Units Affected',
-                    x = total_unitsAffected_by_county.index.values,
-                    y = total_unitsAffected_by_county.values.flatten())],
-            layout = layout)
-        plotly_plt(fig,filename='templates/iframes/%s.html'%(fname),auto_open=False)
-    if pltType == 'multipleBar':
-        #total_adults_by_county = pd.pivot_table(incidents_df, values='Adults', index='County',aggfunc='sum')
-        pass
+    fig = go.Figure(data=data,layout=layout)
+    plotly_plt(fig,filename='templates/iframes/%s.html'%(fname),auto_open=False)
 
 def create_map(incidents_df,stations_df,location,zoom_start,outputName):
     # Construct Map
@@ -122,7 +108,7 @@ def create_map(incidents_df,stations_df,location,zoom_start,outputName):
     station_locations = stations_df[['lat','lng']].values
     MarkerCluster(
         locations = station_locations,
-        icons = [folium.Icon(color='red',icon_color='white',icon='fire-extinguisher', prefix="fa",) for _ in range(len(station_locations))],
+        icons = [folium.Icon(color='green',icon_color='white',icon='fire-extinguisher', prefix="fa",) for _ in range(len(station_locations))],
         name = 'Fire Station Markers',
         show = False).add_to(incident_map)
     HeatMap(station_locations,name='Fire Stations HeatMap',show=False).add_to(incident_map)
@@ -132,6 +118,7 @@ def create_map(incidents_df,stations_df,location,zoom_start,outputName):
     incident_map.save(outfile='templates/iframes/%s.html'%outputName)
 
 if __name__ == '__main__':
+    ''' Run this file to generate Static plots and maps '''
     # Global DataFrames
     #    Incidents
     incidents_df_dirty = pd.read_csv('data/Incidents_Clean.csv')
@@ -156,16 +143,29 @@ if __name__ == '__main__':
     # Create scatter plot
     gen_figure(
         pltType = 'scatter',
-        title = 'Fire_Injuries_Casualities_by_Adults_Present',
-        xlabel = 'Adults',
-        ylabel = 'Outcome',
-        data_x = nearby_df['Adults'].values,
-        data_y = {'Hospitalized':nearby_df['People Hospitalized'].values,
-                'Deceased':nearby_df['People Deceased'].values},
+        title = 'Fire Injuries and Casualities by Adults Present',
+        xlabel = 'Number Families',
+        ylabel = 'Assistance',
+        data_x = incidents_df['Families'].values,
+        data_y = {'Assistance':incidents_df['Assistance'].values},
         fname = 'plotly_Scatter_Static')
+    # Create Bar Chart plot
+    xaxis = 'County'
+    total_injured_by_county = pd.pivot_table(incidents_df,values='People Injured',index=xaxis,aggfunc='sum')
+    total_unitsAffected_by_county = pd.pivot_table(incidents_df,values='Units Affected',index=xaxis,aggfunc='sum')
+    gen_figure(
+        pltType = 'multiBar',
+        title = 'People and Units Affected by County',
+        xlabel = 'County',
+        ylabel = 'Affects',
+        data_x = total_injured_by_county.index.values,
+        data_y = {
+            'People Injured':total_injured_by_county.values.flatten(),
+            'Units Affected':total_unitsAffected_by_county.values.flatten()},
+        fname = 'plotly_MultiBar_Static')
     # Get stats of nearby incidents
     nearby_stats_df = gen_stat_df(
-        df=nearby_df,
+        df = nearby_df,
         categories=['Units Destroyed','Units Major', 'Units Minor', 'Units Affected',
               'People Injured', 'People Hospitalized', 'People Deceased',
               'Adults', 'Children', 'Families','Assistance'],
