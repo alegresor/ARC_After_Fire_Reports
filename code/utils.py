@@ -10,7 +10,7 @@ from folium.plugins import MarkerCluster,HeatMap
 from plotly.offline import plot as plotly_plt
 from plotly import graph_objs as go
 from plotly import tools
-tools.set_credentials_file(username='alegresor', api_key='Z3RQvJzooCh3ib7nBNPg')
+tools.set_credentials_file(username='alegresor', api_key='')
 
 stat_fs = OrderedDict({
     'total': lambda x: nansum(x),
